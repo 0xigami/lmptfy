@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Let Me Prompt That For You</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90' font-family='Arial' fill='%234285F4'>P</text></svg>">
+  <meta name="description" content="For all those people who find it more convenient to bother you with their questions than to prompt an AI themselves.">
+  <meta property="og:title" content="Let Me Prompt That For You">
+  <meta property="og:description" content="For all those people who find it more convenient to bother you with their questions than to prompt an AI themselves.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://lmptfy.co">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Let Me Prompt That For You">
+  <meta name="twitter:description" content="For all those people who find it more convenient to bother you with their questions than to prompt an AI themselves.">
+  <link rel="canonical" href="https://lmptfy.co">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Catamaran:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Reset & Base */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: arial, sans-serif;
+      font-size: 14px;
+      color: #202124;
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header nav */
+    .header {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 10px 15px;
+      gap: 16px;
+    }
+
+    .header a {
+      color: rgba(0,0,0,.87);
+      font-size: 13px;
+      text-decoration: none;
+      line-height: 24px;
+    }
+
+    .header a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main content area */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      padding-top: 120px;
+    }
+
+    @media (max-height: 600px) {
+      .main {
+        padding-top: 60px;
+      }
+    }
+
+    /* Logo */
+    .logo {
+      font-size: 92px;
+      font-weight: 400;
+      letter-spacing: -2px;
+      margin-bottom: 28px;
+      user-select: none;
+      font-family: 'Catamaran', 'Arial Rounded MT Bold', arial, sans-serif;
+    }
+
+    .logo .l-blue { color: #4285F4; }
+    .logo .l-red { color: #EA4335; }
+    .logo .l-yellow { color: #FBBC05; }
+    .logo .l-green { color: #34A853; }
+
+    /* Search form */
+    .search-wrapper {
+      width: 100%;
+      max-width: 584px;
+      padding: 0 16px;
+    }
+
+    .search-box {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      border: 1px solid #dfe1e5;
+      border-radius: 24px;
+      padding: 0 14px;
+      height: 46px;
+      background: #fff;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+
+    .search-box:hover {
+      box-shadow: 0 1px 6px rgba(32,33,36,.28);
+      border-color: rgba(223,225,229,0);
+    }
+
+    .search-box.focused {
+      box-shadow: 0 1px 6px rgba(32,33,36,.28);
+      border-color: rgba(223,225,229,0);
+    }
+
+    .search-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-right: 12px;
+      color: #9aa0a6;
+    }
+
+    .search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      font-family: arial, sans-serif;
+      color: #202124;
+      background: transparent;
+      line-height: 34px;
+    }
+
+    .search-input::placeholder {
+      color: #9aa0a6;
+    }
+
+    /* Buttons */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 26px;
+      flex-wrap: wrap;
+      padding: 0 16px;
+    }
+
+    .btn {
+      background-color: #f8f9fa;
+      border: 1px solid #f8f9fa;
+      border-radius: 4px;
+      color: #3c4043;
+      font-family: arial, sans-serif;
+      font-size: 14px;
+      padding: 0 16px;
+      height: 36px;
+      line-height: 36px;
+      cursor: pointer;
+      min-width: 54px;
+      text-align: center;
+      user-select: none;
+      transition: background-color 0.1s, border-color 0.1s, box-shadow 0.1s;
+    }
+
+    .btn:hover {
+      box-shadow: 0 1px 1px rgba(0,0,0,.1);
+      background-color: #f8f9fa;
+      border: 1px solid #dadce0;
+      color: #202124;
+    }
+
+    .btn:active, .btn.pressed {
+      background-color: #e8e8e9;
+      border-color: #dadce0;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+    }
+
+    .btn.hovered {
+      box-shadow: 0 1px 1px rgba(0,0,0,.1);
+      background-color: #f8f9fa;
+      border: 1px solid #dadce0;
+      color: #202124;
+    }
+
+    /* Subtitle */
+    .subtitle {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #70757a;
+      text-align: center;
+      padding: 0 16px;
+    }
+
+    /* Footer */
+    .footer {
+      background: #f2f2f2;
+      border-top: 1px solid #dadce0;
+      padding: 15px 30px;
+      text-align: center;
+      font-size: 13px;
+      color: #70757a;
+    }
+
+    /* ===== Link result box (creator mode) ===== */
+    .link-result {
+      display: none;
+      margin-top: 30px;
+      width: 100%;
+      max-width: 584px;
+      padding: 0 16px;
+    }
+
+    .link-result.show {
+      display: block;
+    }
+
+    .link-box {
+      background: #e6f4ea;
+      border: 1px solid #34a853;
+      border-radius: 8px;
+      padding: 20px;
+    }
+
+    .link-box-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e8e3e;
+      margin-bottom: 12px;
+    }
+
+    .link-url-container {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .link-url {
+      flex: 1;
+      background: #fff;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #202124;
+      word-break: break-all;
+      font-family: monospace;
+      line-height: 1.4;
+      overflow: hidden;
+    }
+
+    .copy-btn {
+      background: #1a73e8;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background-color 0.15s;
+    }
+
+    .copy-btn:hover {
+      background: #1557b0;
+    }
+
+    .copy-btn.copied {
+      background: #34a853;
+    }
+
+    .preview-btn {
+      display: inline-block;
+      margin-top: 12px;
+      background: none;
+      border: 1px solid #dadce0;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-size: 13px;
+      color: #1a73e8;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .preview-btn:hover {
+      background: #f0f6ff;
+    }
+
+    /* ===== Animated cursor ===== */
+    .anim-cursor {
+      display: none;
+      position: fixed;
+      width: 18px;
+      height: 24px;
+      z-index: 9999;
+      pointer-events: none;
+      filter: drop-shadow(1px 2px 2px rgba(0,0,0,.3));
+      transition: none;
+    }
+
+    .anim-cursor.moving {
+      transition: left 0.8s cubic-bezier(0.25, 0.1, 0.25, 1), top 0.8s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+
+    /* ===== Instruction banner ===== */
+    .instruction {
+      display: none;
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1a73e8;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      padding: 14px 28px;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      z-index: 9998;
+      white-space: nowrap;
+      max-width: 90vw;
+      text-align: center;
+    }
+
+    .instruction.show {
+      display: block;
+    }
+
+    /* ===== Snarky overlay ===== */
+    .snarky-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .snarky-overlay.show {
+      display: flex;
+    }
+
+    .snarky-message {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 50px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,.3);
+      max-width: 90vw;
+    }
+
+    .snarky-message p {
+      font-size: 28px;
+      font-weight: 700;
+      color: #202124;
+      margin-bottom: 12px;
+    }
+
+    .snarky-message small {
+      font-size: 14px;
+      color: #70757a;
+    }
+
+    /* Hide real cursor during animation */
+    body.animating, body.animating * {
+      cursor: none !important;
+    }
+
+    /* Mobile */
+    @media (max-width: 600px) {
+      .logo {
+        font-size: 60px;
+        letter-spacing: -1px;
+      }
+
+      .main {
+        padding-top: 80px;
+      }
+
+      .link-url-container {
+        flex-direction: column;
+      }
+
+      .snarky-message {
+        padding: 30px 24px;
+      }
+
+      .snarky-message p {
+        font-size: 22px;
+      }
+
+      .instruction {
+        font-size: 14px;
+        padding: 12px 20px;
+        bottom: 40px;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <a href="https://www.perplexity.ai" target="_blank" rel="noopener">Perplexity</a>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Logo: "Prompt" in Google colors -->
+    <div class="logo" aria-label="Prompt">
+      <span class="l-blue">P</span><span class="l-red">r</span><span class="l-yellow">o</span><span class="l-blue">m</span><span class="l-green">p</span><span class="l-red">t</span>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrapper">
+      <div class="search-box" id="searchBox">
+        <svg class="search-icon" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+        <input
+          type="text"
+          class="search-input"
+          id="searchInput"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          aria-label="Search"
+          maxlength="2048"
+        >
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="buttons">
+      <button class="btn" id="btnSearch">AI Search</button>
+      <button class="btn" id="btnLucky">I'm Feeling Prompted</button>
+    </div>
+
+    <!-- Subtitle -->
+    <div class="subtitle">Let Me Prompt That For You...</div>
+
+    <!-- Link result (creator mode) -->
+    <div class="link-result" id="linkResult">
+      <div class="link-box">
+        <div class="link-box-title">Copy this link and send it to your clueless friend:</div>
+        <div class="link-url-container">
+          <div class="link-url" id="linkUrl"></div>
+          <button class="copy-btn" id="copyBtn">Copy</button>
+        </div>
+        <button class="preview-btn" id="previewBtn">Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    lmptfy.co &middot; Not affiliated with Google, Perplexity, or anyone with common sense.
+  </div>
+
+  <!-- Animated cursor (SVG arrow) -->
+  <svg class="anim-cursor" id="animCursor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 28" fill="none">
+    <path d="M4 2 L4 24 L10 18 L16 26 L20 24 L14 16 L22 16 Z" fill="#fff" stroke="#000" stroke-width="1.5" stroke-linejoin="round"/>
+  </svg>
+
+  <!-- Instruction banner -->
+  <div class="instruction" id="instruction"></div>
+
+  <!-- Snarky overlay -->
+  <div class="snarky-overlay" id="snarkyOverlay">
+    <div class="snarky-message">
+      <p id="snarkyText"></p>
+      <small>Redirecting to Perplexity...</small>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const searchBox = document.getElementById('searchBox');
+      const searchInput = document.getElementById('searchInput');
+      const btnSearch = document.getElementById('btnSearch');
+      const btnLucky = document.getElementById('btnLucky');
+      const linkResult = document.getElementById('linkResult');
+      const linkUrl = document.getElementById('linkUrl');
+      const copyBtn = document.getElementById('copyBtn');
+      const previewBtn = document.getElementById('previewBtn');
+      const animCursor = document.getElementById('animCursor');
+      const instruction = document.getElementById('instruction');
+      const snarkyOverlay = document.getElementById('snarkyOverlay');
+      const snarkyText = document.getElementById('snarkyText');
+
+      // Focus states for search box
+      searchInput.addEventListener('focus', () => searchBox.classList.add('focused'));
+      searchInput.addEventListener('blur', () => searchBox.classList.remove('focused'));
+
+      // Check for query param
+      const params = new URLSearchParams(window.location.search);
+      const query = params.get('q');
+
+      if (query) {
+        // === RECIPIENT ANIMATION MODE ===
+        document.title = 'LMPTFY: ' + query;
+        runAnimation(query);
+      } else {
+        // === CREATOR MODE ===
+        setupCreatorMode();
+      }
+
+      function setupCreatorMode() {
+        // Focus input on load
+        searchInput.focus();
+
+        btnSearch.addEventListener('click', generateLink);
+        searchInput.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') generateLink();
+        });
+
+        btnLucky.addEventListener('click', function() {
+          const q = searchInput.value.trim();
+          if (q) {
+            window.open('https://www.perplexity.ai/search?q=' + encodeURIComponent(q), '_blank');
+          }
+        });
+      }
+
+      let currentLink = '';
+
+      function generateLink() {
+        const q = searchInput.value.trim();
+        if (!q) {
+          searchInput.focus();
+          return;
+        }
+        const base = 'https://lmptfy.co/';
+        currentLink = base + '?q=' + encodeURIComponent(q);
+        linkUrl.textContent = currentLink;
+        linkResult.classList.add('show');
+
+        // Scroll into view
+        linkResult.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+
+      copyBtn.addEventListener('click', function() {
+        if (!currentLink) return;
+        navigator.clipboard.writeText(currentLink).then(() => {
+          copyBtn.textContent = 'Copied!';
+          copyBtn.classList.add('copied');
+          setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+            copyBtn.classList.remove('copied');
+          }, 2000);
+        });
+      });
+
+      previewBtn.addEventListener('click', function() {
+        if (!currentLink) return;
+        window.open(currentLink, '_blank');
+      });
+
+      // === ANIMATION ===
+      function runAnimation(query) {
+        // Disable input during animation
+        document.body.classList.add('animating');
+        searchInput.readOnly = true;
+        searchInput.style.caretColor = 'transparent';
+        btnSearch.style.pointerEvents = 'none';
+        btnLucky.style.pointerEvents = 'none';
+
+        const snarkyMessages = [
+          "Was that so hard?",
+          "The AI is embarrassed for you.",
+          "Even a language model is sighing right now.",
+          "You could've done this yourself. But here we are.",
+          "Next time, try prompting it yourself.",
+          "Congratulations. You've been computed."
+        ];
+
+        // Show cursor offscreen
+        animCursor.style.display = 'block';
+        animCursor.style.left = '-40px';
+        animCursor.style.top = '-40px';
+
+        const timeline = [
+          // Step 1: Show instruction
+          { delay: 600, action: () => {
+            instruction.textContent = 'Step 1: Type your question';
+            instruction.classList.add('show');
+          }},
+
+          // Move cursor to search input
+          { delay: 800, action: () => {
+            const rect = searchInput.getBoundingClientRect();
+            animCursor.classList.add('moving');
+            animCursor.style.left = (rect.left + 60) + 'px';
+            animCursor.style.top = (rect.top + rect.height / 2 - 4) + 'px';
+          }},
+
+          // Click the search box (focus it)
+          { delay: 1000, action: () => {
+            searchBox.classList.add('focused');
+          }},
+
+          // Type out the query
+          { delay: 400, action: () => {
+            typeText(searchInput, query, 50, () => {
+              // After typing done, move to step 2
+              setTimeout(() => {
+                instruction.textContent = 'Step 2: Click the search button';
+
+                // Move cursor to the AI Search button
+                setTimeout(() => {
+                  const btnRect = btnSearch.getBoundingClientRect();
+                  animCursor.style.left = (btnRect.left + btnRect.width / 2) + 'px';
+                  animCursor.style.top = (btnRect.top + btnRect.height / 2 - 4) + 'px';
+
+                  // Hover state
+                  setTimeout(() => {
+                    btnSearch.classList.add('hovered');
+
+                    // Click state
+                    setTimeout(() => {
+                      btnSearch.classList.add('pressed');
+                      btnSearch.classList.remove('hovered');
+
+                      setTimeout(() => {
+                        btnSearch.classList.remove('pressed');
+
+                        // Hide cursor and instruction
+                        animCursor.style.display = 'none';
+                        instruction.classList.remove('show');
+
+                        // Show snarky message
+                        setTimeout(() => {
+                          const msg = snarkyMessages[Math.floor(Math.random() * snarkyMessages.length)];
+                          snarkyText.textContent = msg;
+                          snarkyOverlay.classList.add('show');
+
+                          // Redirect after 2.5 seconds
+                          setTimeout(() => {
+                            window.location.href = 'https://www.perplexity.ai/search?q=' + encodeURIComponent(query);
+                          }, 2500);
+                        }, 300);
+                      }, 200);
+                    }, 500);
+                  }, 600);
+                }, 400);
+              }, 500);
+            });
+          }}
+        ];
+
+        let totalDelay = 0;
+        timeline.forEach(step => {
+          totalDelay += step.delay;
+          setTimeout(step.action, totalDelay);
+        });
+      }
+
+      function typeText(input, text, speed, callback) {
+        let i = 0;
+        function type() {
+          if (i < text.length) {
+            input.value += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+          } else if (callback) {
+            callback();
+          }
+        }
+        type();
+      }
+
+    })();
+  </script>
+</body>
+</html>
